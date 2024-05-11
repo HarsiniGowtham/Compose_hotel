@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -26,14 +27,15 @@ import com.hgh.hotelcompose.Routes
 import com.hgh.hotelcompose.ui.theme.Purple700
 
 @Composable
-fun LoginPage(navController: NavHostController){
+fun SignUp(navController: NavHostController) {
+
     Box(modifier = Modifier.fillMaxSize()) {
         ClickableText(
-            text = AnnotatedString("Sign up here"),
+            text = AnnotatedString("Already Have account"),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(20.dp),
-            onClick = { navController.navigate(Routes.SignUp.route) },
+            onClick = { navController.navigate(Routes.Login.route) },
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Default,
@@ -50,8 +52,9 @@ fun LoginPage(navController: NavHostController){
 
         val username = remember { mutableStateOf(TextFieldValue()) }
         val password = remember { mutableStateOf(TextFieldValue()) }
+        val confirmPassword = remember { mutableStateOf(TextFieldValue()) }
 
-        Text(text = "Login", style = TextStyle(fontSize = 40.sp))
+        Text(text = "Sign Up", style = TextStyle(fontSize = 40.sp))
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
             label = { Text(text = "Username") },
@@ -67,29 +70,30 @@ fun LoginPage(navController: NavHostController){
             onValueChange = { password.value = it })
 
         Spacer(modifier = Modifier.height(20.dp))
+        TextField(
+            label = { Text(text = "Confirm Password") },
+            value = confirmPassword.value,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            onValueChange = { confirmPassword.value = it })
+
+        Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
                 onClick = {navController.navigate(Routes.Home.route)
-                    println("Username: ${username.value.text}, Password: ${password.value.text}")
+                    println("Username: ${username.value.text}, Password: ${password.value.text}, Confirm-Password: ${confirmPassword.value.text}")
                 },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Text(text = "Login")
+                Text(text = "SignUp")
             }
         }
 
-
         Spacer(modifier = Modifier.height(20.dp))
-        ClickableText(
-            text = AnnotatedString("Forgot password?"),
-            onClick = { navController.navigate(Routes.ForgotPassword.route)},
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Default
-            )
-        )
+
     }
 }
+
