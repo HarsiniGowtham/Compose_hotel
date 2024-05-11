@@ -4,12 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -23,7 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.hgh.hotelcompose.Routes
+import com.hgh.hotelcompose.ui.theme.Purple200
 import com.hgh.hotelcompose.ui.theme.Purple700
+
 
 @Composable
 fun LoginPage(navController: NavHostController){
@@ -48,48 +46,81 @@ fun LoginPage(navController: NavHostController){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val username = remember { mutableStateOf(TextFieldValue()) }
-        val password = remember { mutableStateOf(TextFieldValue()) }
+        var username by remember { mutableStateOf(TextFieldValue()) }
+        var password by remember { mutableStateOf(TextFieldValue()) }
 
-        Text(text = "Login", style = TextStyle(fontSize = 40.sp))
-        Spacer(modifier = Modifier.height(20.dp))
-        TextField(
-            label = { Text(text = "Username") },
-            value = username.value,
-            onValueChange = { username.value = it })
+        var showError by remember { mutableStateOf(false) }
 
-        Spacer(modifier = Modifier.height(20.dp))
-        TextField(
-            label = { Text(text = "Password") },
-            value = password.value,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            onValueChange = { password.value = it })
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Login",
+                style = MaterialTheme.typography.h4
+            )
 
-        Spacer(modifier = Modifier.height(20.dp))
-        Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            TextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
+                isError = showError && username.text.isEmpty()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                isError = showError && password.text.isEmpty()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
-                onClick = {navController.navigate(Routes.Home.route)
-                    println("Username: ${username.value.text}, Password: ${password.value.text}")
+                onClick = {
+                    if (username.text.isEmpty() || password.text.isEmpty()) {
+                        showError = true
+                    } else {
+                        navController.navigate(Routes.Home.route)
+                    }
                 },
-                shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(25.dp)
             ) {
-                Text(text = "Login")
+                Text("Login")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ClickableText(
+                text = AnnotatedString("Forgot password?"),
+                onClick = { navController.navigate(Routes.ForgotPassword.route) },
+            )
+
+            if (showError) {
+                Snackbar(
+                    modifier = Modifier.padding(16.dp),
+                    backgroundColor = Purple200,
+                    action = {
+                        TextButton(onClick = { showError = false }) {
+                            Text("Dismiss")
+                        }
+                    }
+                ) {
+                    Text("Please provide valid input")
+                }
             }
         }
-
-
-        Spacer(modifier = Modifier.height(20.dp))
-        ClickableText(
-            text = AnnotatedString("Forgot password?"),
-            onClick = { navController.navigate(Routes.ForgotPassword.route)},
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Default
-            )
-        )
     }
 }
