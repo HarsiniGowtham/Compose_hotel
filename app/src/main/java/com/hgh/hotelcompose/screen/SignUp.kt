@@ -4,12 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
@@ -24,7 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.hgh.hotelcompose.Routes
+import com.hgh.hotelcompose.ui.theme.Purple200
 import com.hgh.hotelcompose.ui.theme.Purple700
+import com.hgh.hotelcompose.ui.theme.Red
+import com.hgh.hotelcompose.ui.theme.Teal200
 
 @Composable
 fun SignUp(navController: NavHostController) {
@@ -49,39 +48,60 @@ fun SignUp(navController: NavHostController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        var username by remember { mutableStateOf(TextFieldValue()) }
+        var password by remember { mutableStateOf(TextFieldValue()) }
+        var confirmPassword by remember { mutableStateOf(TextFieldValue()) }
 
-        val username = remember { mutableStateOf(TextFieldValue()) }
-        val password = remember { mutableStateOf(TextFieldValue()) }
-        val confirmPassword = remember { mutableStateOf(TextFieldValue()) }
+        var showError by remember { mutableStateOf(false) }
+        var passwordsMatch by remember { mutableStateOf(true) }
 
         Text(text = "Sign Up", style = TextStyle(fontSize = 40.sp))
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
-            label = { Text(text = "Username") },
-            value = username.value,
-            onValueChange = { username.value = it })
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            isError = showError && username.text.isEmpty()
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
-            label = { Text(text = "Password") },
-            value = password.value,
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            onValueChange = { password.value = it })
+            isError = showError && password.text.isEmpty()
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
-            label = { Text(text = "Confirm Password") },
-            value = confirmPassword.value,
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirm Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            onValueChange = { confirmPassword.value = it })
+            isError = showError && (confirmPassword.text.isEmpty() || !passwordsMatch)
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
-                onClick = {navController.navigate(Routes.Home.route)
-                    println("Username: ${username.value.text}, Password: ${password.value.text}, Confirm-Password: ${confirmPassword.value.text}")
+                onClick = {
+                    if (username.text.isEmpty() || password.text.isEmpty()) {
+                        showError = true
+                    } else {
+                        if (password.text == confirmPassword.text) {
+                            // Passwords match, navigate to home screen or perform sign-up logic
+                            navController.navigate(Routes.Home.route)
+                            println("Username: ${username.text}, Password: ${password.text}, Confirm Password: ${confirmPassword.text}")
+                        } else {
+                            // Passwords don't match, notify user
+                            passwordsMatch = false
+                            showError = true
+                        }
+                    }
+                    println("Username: ${username.text}, Password: ${password.text}, Confirm-Password: ${confirmPassword.text}")
                 },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
@@ -94,6 +114,22 @@ fun SignUp(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-    }
+        if (showError) {
+            Snackbar(
+                modifier = Modifier.padding(16.dp),
+                backgroundColor = if (passwordsMatch) Red else Purple200, // Change background color based on passwords match status
+                action = {
+                    TextButton(onClick = {
+                        showError = false
+                        passwordsMatch = true // Reset passwords match status when dismissing the Snackbar
+                    }) {
+                        Text("Dismiss")
+                    }
+                }
+            ) {
+                Text(if (passwordsMatch) "Please provide valid input" else "Passwords do not match")
+            }
+        } }
+
 }
 
